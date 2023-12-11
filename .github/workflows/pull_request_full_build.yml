@@ -93,8 +93,12 @@ jobs:
 
       - name: Checkout non-default branch
         run: |
-         for module_name in $(jq -r '.standard_library| .[] | select(.level==${{ matrix.level }}) | .name' extensions.json); do \
-         cd $module_name && git fetch origin && (git checkout -t origin/dev || :) && cd ..; \
+         for module_name in $(jq -r '.standard_library| .[] | select(.level==${{ matrix.level }}) | .name' extensions.json); \
+         do 
+           cd $module_name
+           git fetch origin
+           git checkout -t origin/dev || :
+           cd ..
          done
 
       - name: Update Lang Version in Module
@@ -105,10 +109,8 @@ jobs:
 
       - name: Build Module
         run: |
-          for module_name in $(jq -r '.standard_library| .[] | select(.level==${{ matrix.level }}) | .name' extensions.json); do \
           echo "Building Standard Library: $module_name" && \
-          cd $module_name && ./gradlew clean build --stacktrace --scan && cd ..; \
-          done
+          cd module-ballerina-sql && ./gradlew clean build --stacktrace --scan && cd ..; 
         env:
           packageUser: ${{ secrets.BALLERINA_BOT_USERNAME }}
           packagePAT: ${{ secrets.GITHUB_TOKEN }}
